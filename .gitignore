@@ -1,0 +1,7 @@
+*.o
+*.out
+data/
+failures/
+test/
+debug/
+sfse_parse
