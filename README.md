@@ -9,7 +9,7 @@ the former. It's VLOOKUP, but in standalone form.
   you're going to be matching on.
 
 ####Input: 
- - ./sfse_parse <file1> <lookup file> <file1 col> <lookup col> <output col>
+ - ./sfseparse \[file1\] \[lookup file\] \[file1 col\] \[lookup col\] \[output col\]
  - columns are 0-indexed.
 
 ####Output:
