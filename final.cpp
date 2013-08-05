@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
         int foundIndex;
         int idColumn = atoi(argv[3]);
         int lookupColumn = atoi(argv[4]);
-        int locColumn = atoi(argv[5]);
+  //      int locColumn = atoi(argv[5]);
         
         vector<string> foundRow;
         vector<vector<string> > found;
@@ -57,7 +57,14 @@ int main(int argc, char* argv[])
             //then push it to the original SE Row data, then push that
             //to the found vector
             foundRow = seData[row];
-            foundRow.push_back(sfData[foundIndex][locColumn]);
+
+            //loop through any remaining args and push the specified columns
+            //should really add error checking to spots like this
+            for(int argCount = 5; argCount < argc; argCount++)
+            {
+              int locColumn = atoi(argv[argCount]);
+              foundRow.push_back(sfData[foundIndex][locColumn]);
+            }
             found.push_back(foundRow);
             foundRow.clear();
           } else {
@@ -78,7 +85,7 @@ int main(int argc, char* argv[])
     }
 
   } else {
-    cout << "Syntax is: ./sfse_parse <SE File> <SF File> <SE Col> <SF lookup col> <SF output col>\n";
+    cout << "Syntax is: ./sfse_parse <SE File> <SF File> <SE Col> <SF lookup col> <one or more SF output cols>\n";
   }
 }
 

@@ -5,3 +5,4 @@ failures/
 test/
 debug/
 sfse_parse
+*.csv
