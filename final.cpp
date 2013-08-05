@@ -94,39 +94,43 @@ void parseCSV(fstream &file, vector<vector<string> > &rowList)
   //now until we hit the end, keep peeling and alayzing each char in fstream
   while(file.good())
   {
-    //if it's a comma, we're between cells. push cell to row.
-    if(c == ',')
+    switch(c)
     {
-      if(cell[0] == '"' && cell[cell.length()-1] != '"'){
-        cell += '"';
-      }
-      row.push_back(cell);
-      cell.clear();
-    } else if(c == '\n') {
-    //if it's a newline, we're at the end of the line. push cell to row and
-    //row to rowList
-      if(cell[0] == '"' && cell[cell.length()-1] != '"'){
-        cell += '"';
-      }
-      row.push_back(cell);
-      rowList.push_back(row);
+      case ',':
+        //if it's a comma, we're between cells. push cell to row.
+        if(cell[0] == '"' && cell[cell.length()-1] != '"'){
+          cell += '"';
+        }
+        row.push_back(cell);
+        cell.clear();
+        break;
+      case '\n':
+        //if it's a newline, we're at the end of the line. push cell to row and
+        //row to rowList
+        if(cell[0] == '"' && cell[cell.length()-1] != '"'){
+          cell += '"';
+        }
+        row.push_back(cell);
+        rowList.push_back(row);
 
-      cell.clear();
-      row.clear();
-    } else if(c == '"') {
-    //this is where it gets a tad messy - if it's a double quote,
-    //loop until we hit the next double quote. ignore commas, newlines, and
-    //anything else in between. sould probably add the ability to \"
-      cell += c;
-      do {
-        c = file.get();
+        cell.clear();
+        row.clear();
+        break;
+      case '"':
+        //this is where it gets a tad messy - if it's a double quote,
+        //loop until we hit the next double quote. ignore commas, newlines, and
+        //anything else in between. sould probably add the ability to \"
         cell += c;
-      } while(c != '"');
-    } else {
-    //if we made it this far, just add it to the cell
-      if(cell.empty()) {
-        cell += '"';
-      }
+        do {
+          c = file.get();
+          cell += c;
+        } while(c != '"');
+        break;
+      default:
+        //if we made it this far, just add it to the cell
+        if(cell.empty()) {
+          cell += '"';
+        }
         cell += c;
     }  
     c = file.get();
