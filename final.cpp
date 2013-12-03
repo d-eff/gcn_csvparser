@@ -8,79 +8,176 @@ using namespace std;
 
 void parseCSV(fstream &file, vector<vector<string> > &rowList);
 int bSearch(string searchItem, vector<vector<string> > &searchVector, int col);
-void printCSV(vector<vector<string> > &rowList, ofstream &file);
+void printCSV(vector<vector<string> > &rowList, ofstream &file, bool addCustomData, string customData);
 
 int main(int argc, char* argv[])
 {
   //open the file, if provided
-  if(argc > 5)
+  if(argc >= 3)
   {
     //fstream to hold the file
     fstream file;
 
     //2d vectors for the csvs
-    vector<vector<string> > seData;
-    vector<vector<string> > sfData;
+    vector<vector<string> > inputCSV;
+    vector<vector<string> > lookupCSV;
     
     //open the first file (the one with the data we want to update)
     file.open(argv[1]);
     if(file.good())
     {
-      parseCSV(file, seData);
+      parseCSV(file, inputCSV);
       file.close();
       
       //open the second file 
       file.open(argv[2]);
       if(file.good())
       {
-        parseCSV(file, sfData);
+        parseCSV(file, lookupCSV);
         file.close();
-        //both files parsed, yay
+        //both files parsed
+  
+    //deal with additional flags
+    int exArgs = 3;
 
-        int foundIndex;
-        int idColumn = atoi(argv[3]);
-        int lookupColumn = atoi(argv[4]);
-  //      int locColumn = atoi(argv[5]);
-        
+    bool splitOnNotFound = false;
+    bool addOutputColumn = false;
+    bool omitHeader = false;
+    bool useCustomHeader = false;
+
+    int idColumn = 0;
+        int lookupColumn = 0;
+    int locColumn = 1;
+    
+    int foundIndex;
+
+    string outputColHeader = "";
+    string outputData = "";
+    string customHeader = "";
+    
+    while(exArgs < argc)
+    {
+      switch(argv[exArgs][1])
+      {
+        case 's':
+          splitOnNotFound = true;
+          exArgs++;
+        break;
+        case 'a':
+          addOutputColumn = true; 
+          outputColHeader += '\"';
+          outputColHeader += argv[exArgs+1];
+          outputColHeader += '\"';
+          outputData = argv[exArgs+2];
+          exArgs += 3;
+        break;
+        case 'c':
+          idColumn = atoi(argv[exArgs+1]);
+          lookupColumn = atoi(argv[exArgs+2]);
+          locColumn = atoi(argv[exArgs+3]);
+          exArgs += 4;
+        break;
+        case 'o':
+          omitHeader = true;
+          exArgs++;
+        break;
+        case 'h':
+          useCustomHeader = true;
+          customHeader = argv[exArgs+1];
+          exArgs++;
+        break;
+        default:
+          exArgs++;
+      }
+    }
+
+     
         vector<string> foundRow;
         vector<vector<string> > found;
-        vector<vector<string> > notFound;
+    vector<vector<string> > notFound;
+    
 
-        //loop all through the seData
-        for(int row = 0; row < seData.size(); ++row)
+    //add the header to the output file(s)    
+    if(!omitHeader) {
+      found.push_back(inputCSV[0]);
+
+      if(splitOnNotFound)
+        notFound.push_back(inputCSV[0]);
+    }
+  
+    //add the custom header to the output file(s)
+    if(useCustomHeader)
+    {
+        found[0].push_back(customHeader);
+
+        if(splitOnNotFound)
+          notFound[0].push_back(customHeader);
+    } else {
+        found[0].push_back(lookupCSV[0][locColumn]);
+
+        if(splitOnNotFound)
+          notFound[0].push_back(lookupCSV[0][locColumn]);
+    }
+
+
+    if(addOutputColumn)
+    {
+      found[0].push_back(outputColHeader);
+
+      if(splitOnNotFound)
+        notFound[0].push_back(outputColHeader);
+    }
+
+
+
+        //loop all through the inputCSV
+        for(unsigned int row = 1; row < inputCSV.size(); ++row)
         {
-          //for each one, bsearch the sfData, get the row it's in back
-          foundIndex = bSearch(seData[row][idColumn], sfData, lookupColumn);
+          //for each one, bsearch the lookupCSV, get the row it's in back
+          foundIndex = bSearch(inputCSV[row][idColumn], lookupCSV, lookupColumn);
           if(foundIndex >= 0)
           { 
-            //if we found it, get the data we want from the foundIndex row of SFdata
+            //if we found it, get the data we want from the foundIndex row of lookupCSV
             //then push it to the original SE Row data, then push that
             //to the found vector
-            foundRow = seData[row];
+            foundRow = inputCSV[row];
 
             //loop through any remaining args and push the specified columns
             //should really add error checking to spots like this
-            for(int argCount = 5; argCount < argc; argCount++)
-            {
-              int locColumn = atoi(argv[argCount]);
-              foundRow.push_back(sfData[foundIndex][locColumn]);
-            }
+            //for(int argCount = 5; argCount < argc; argCount++)
+            //{
+             //int locColumn = atoi(argv[5]);
+              foundRow.push_back(lookupCSV[foundIndex][locColumn]);
+            //}
             found.push_back(foundRow);
             foundRow.clear();
           } else {
-            notFound.push_back(seData[row]);
+      vector<string> unFound = inputCSV[row];            
+      //for(int argCount = 5; argCount < argc; argCount++)
+      //{
+        unFound.push_back("");
+      //}
+      if(splitOnNotFound)
+      {
+        notFound.push_back(unFound);
+      } else
+      {
+        found.push_back(unFound);
+      }
           }
         }
 
         ofstream outFile("found.csv");
         cout << "found: " << found.size() << '\n';
-        printCSV(found, outFile);
+        printCSV(found, outFile, addOutputColumn, outputData);
         outFile.close();
 
-        outFile.open("notFound.csv");
-        cout << "not found: " << notFound.size() << '\n';
-        printCSV(notFound, outFile);
-        outFile.close();
+    if(splitOnNotFound) {
+      outFile.open("insert.csv");
+      cout << "not found: " << notFound.size() << '\n';
+      printCSV(notFound, outFile, addOutputColumn, outputData);
+      outFile.close();
+    }
       }
     }
 
@@ -163,17 +260,19 @@ int bSearch(string searchItem, vector<vector<string> > &searchVector, int col)
   return -1; 
 }
 
-void printCSV(vector<vector<string> > &rowList, ofstream &file)
+void printCSV(vector<vector<string> > &rowList, ofstream &file, bool addCustomData, string customData)
 {
-      for(int x = 0; x < rowList.size(); x++)
+      for(unsigned int x = 0; x < rowList.size(); x++)
       {
-        for(int y = 0; y < rowList[x].size(); y++)
+        for(unsigned int y = 0; y < rowList[x].size(); y++)
         {
           file << rowList[x][y];
 
           if(y < rowList[x].size()-1)
             file << ',';
         }
+    if(x > 0 && addCustomData)
+      file << ',' << '\"' << customData << '\"';
         file << '\n';
       }
 }

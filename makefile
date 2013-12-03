@@ -1,2 +1,2 @@
 all: 
-	g++ final.cpp -o sfse_parse
+	g++ final.cpp -o CSVCombiner
