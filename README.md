@@ -9,12 +9,20 @@ the former. It's VLOOKUP, but in standalone form.
   you're going to be matching on.
 
 ####Input: 
- - ./sfseparse \[file1\] \[lookup file\] \[file1 col\] \[lookup col\] \[output col\]
+ - ./sfseparse \[file1\] \[lookup file\] \[file1 col\] \[lookup col\] \[output col\] \[flags\]
  - columns are 0-indexed.
+
 
 ####Output:
  - Produces two files, found.csv and notFound.csv, which contain the lines that
 were found with the output column data appended, and the lines that were not
 found, respectively.
 
+####Example:
 
+####Flags:
+
+
+
+bugs:
+extra comma
