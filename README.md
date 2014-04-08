@@ -9,10 +9,10 @@ the former. It's VLOOKUP, but in standalone form.
   you're going to be matching on.
 
 ####Input: 
- - ./sfseparse \[input file\] \[lookup file\] \[flags\]
+  ./sfseparse \[input file\] \[lookup file\] \[flags\]
 
 ####Output:
- - By default, produces one file - "found.csv", which contains all rows from the input file, with data from the lookup file appended to any lines where a match was found.
+  By default, produces one file - "found.csv", which contains all rows from the input file, with data from the lookup file appended to any lines where a match was found.
 
 ####Example:
 Given two files, Foo.csv and Bar.csv:
