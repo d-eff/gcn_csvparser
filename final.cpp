@@ -101,7 +101,7 @@
           cout << "case h\n";
           useCustomHeader = true;
           customHeader = argv[exArgs+1];
-          exArgs++;
+          exArgs += 2;
         break;
         default:
           cout << "case def\n";
@@ -117,32 +117,33 @@
       cout << "header not omitted\n";
       if(splitOnNotFound)
         notFound.push_back(inputCSV[0]);
+      
+      //add the custom header to the output file(s)
+      if(useCustomHeader)
+      {
+          found[0].push_back(customHeader);
+
+          if(splitOnNotFound)
+            notFound[0].push_back(customHeader);
+      } else {
+          found[0].push_back(lookupCSV[0][locColumn]);
+
+          if(splitOnNotFound)
+            notFound[0].push_back(lookupCSV[0][locColumn]);
+      }
+
+
+      if(addOutputColumn)
+      {
+        found[0].push_back(outputColHeader);
+
+        if(splitOnNotFound)
+          notFound[0].push_back(outputColHeader);
+      }
     } else {
       cout << "header omitted\n";
     }
   
-    //add the custom header to the output file(s)
-    if(useCustomHeader)
-    {
-        found[0].push_back(customHeader);
-
-        if(splitOnNotFound)
-          notFound[0].push_back(customHeader);
-    } else {
-        found[0].push_back(lookupCSV[0][locColumn]);
-
-        if(splitOnNotFound)
-          notFound[0].push_back(lookupCSV[0][locColumn]);
-    }
-
-
-    if(addOutputColumn)
-    {
-      found[0].push_back(outputColHeader);
-
-      if(splitOnNotFound)
-        notFound[0].push_back(outputColHeader);
-    }
 
 
 
